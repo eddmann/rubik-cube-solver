@@ -1,0 +1,2 @@
+(this["webpackJsonprubik-cube-solver-client"]=this["webpackJsonprubik-cube-solver-client"]||[]).push([[4],{54:function(e,n){function o(e){var n=new Error("Cannot find module '"+e+"'");throw n.code="MODULE_NOT_FOUND",n}o.keys=function(){return[]},o.resolve=o,e.exports=o,o.id=54}}]);
+//# sourceMappingURL=4.6787eaa4.chunk.js.map
