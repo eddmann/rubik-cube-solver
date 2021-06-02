@@ -4,4 +4,4 @@ Built using:
 
 - Rust
 - WebAssembly
-- Herbert Kociemba's two-phase algorithm
+- Stefan Pochmann's Thistlethwaite-based algorithm

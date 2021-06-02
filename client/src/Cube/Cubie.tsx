@@ -92,13 +92,22 @@ const RoundedBox = forwardRef<Mesh, RoundBoxProps>(
 type CubieProps = {
   name: CubePosition;
   position: Vector3;
-  yColour: string;
-  xColour: string;
-  zColour: string;
+  yColour: string | undefined;
+  xColour: string | undefined;
+  zColour: string | undefined;
 };
 
 const Cubie = forwardRef<Mesh, CubieProps>(
-  ({ name, position, yColour, xColour, zColour }, ref) => {
+  (
+    {
+      name,
+      position,
+      yColour = undefined,
+      xColour = undefined,
+      zColour = undefined,
+    },
+    ref
+  ) => {
     return (
       <RoundedBox
         ref={ref}
@@ -109,9 +118,27 @@ const Cubie = forwardRef<Mesh, CubieProps>(
         userData={{ name, position }}
       >
         <meshBasicMaterial color={0x000000} />
-        <Facelet axis="y" inverse={position.x < 0} colour={yColour} />
-        <Facelet axis="x" inverse={position.y < 0} colour={xColour} />
-        <Facelet axis="z" inverse={position.z < 0} colour={zColour} />
+        {yColour && (
+          <Facelet
+            axis="y"
+            inverse={position.x < 0}
+            colour={yColour}
+          />
+        )}
+        {xColour && (
+          <Facelet
+            axis="x"
+            inverse={position.y < 0}
+            colour={xColour}
+          />
+        )}
+        {zColour && (
+          <Facelet
+            axis="z"
+            inverse={position.z < 0}
+            colour={zColour}
+          />
+        )}
       </RoundedBox>
     );
   }

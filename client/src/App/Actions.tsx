@@ -23,15 +23,16 @@ const Actions = ({
   return (
     <div className={styles.Actions}>
       <input
-        size={40}
+        size={80}
         type="text"
-        value={(state.match(/.{1,4}/g) || []).join(' ')}
+        value={(state.match(/.{1,9}/g) || []).join(' ')}
         onChange={e =>
           onStateChange(
             e.target.value.toUpperCase().replace(unknownColours, '')
           )
         }
       />
+      <br />
       <button onClick={onRandom}>Random</button>
       <button onClick={onSolve}>Solve</button>
     </div>

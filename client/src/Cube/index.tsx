@@ -5,7 +5,6 @@ import React, {
   forwardRef,
 } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { chunk } from 'lodash';
 import Cubie from './Cubie';
 import animateRotation, { RotationAnimationStep } from './rotation';
 import {
@@ -14,7 +13,6 @@ import {
   CubeState,
   CUBIE_POSITIONS,
   CUBE_FACELET_COLOURS,
-  CUBE_STATE_LOOKUP,
 } from '../constants';
 
 type CubeProps = {
@@ -26,24 +24,15 @@ type CubeHandle = {
   rotate: (move: string) => Promise<void>;
 };
 
-const toCubieColours = (state: CubeState) =>
-  chunk(
-    [...state].reduce((faces: string[], face, idx) => {
-      faces[CUBE_STATE_LOOKUP[idx]] =
-        CUBE_FACELET_COLOURS[face as CubeFaceletColour];
-      return faces;
-    }, []),
-    3
-  );
-
 const Cube = forwardRef<CubeHandle, CubeProps>(({ state }, ref) => {
   const cubiesRef = useRef<THREE.Mesh[]>([]);
-  const rotationRef = useRef<
-    | [doStep: RotationAnimationStep, onCompletion: () => void]
-    | undefined
-  >();
+  const rotationRef =
+    useRef<
+      | [doStep: RotationAnimationStep, onCompletion: () => void]
+      | undefined
+    >();
 
-  const stateWithPadding: CubeState = state.padEnd(24, 'W');
+  const stateWithPadding: CubeState = state.padEnd(54, 'W');
 
   useFrame(() => {
     if (!rotationRef.current) return;
@@ -75,13 +64,17 @@ const Cube = forwardRef<CubeHandle, CubeProps>(({ state }, ref) => {
 
   useImperativeHandle(ref, () => ({ reset, rotate }));
 
-  const cubieColours = toCubieColours(stateWithPadding);
-
   return (
     <group ref={ref}>
       {Object.entries(CUBIE_POSITIONS).map(
-        ([name, position], idx) => {
-          const [yColour, xColour, zColour] = cubieColours[idx];
+        ([name, { position, facelets }], idx) => {
+          const [xColour, yColour, zColour] = facelets.map(idx =>
+            idx !== undefined
+              ? CUBE_FACELET_COLOURS[
+                  stateWithPadding[idx] as CubeFaceletColour
+                ]
+              : undefined
+          );
 
           return (
             <Cubie
@@ -89,8 +82,8 @@ const Cube = forwardRef<CubeHandle, CubeProps>(({ state }, ref) => {
               ref={el => (cubiesRef.current[idx] = el as THREE.Mesh)}
               name={name as CubePosition}
               position={position}
-              yColour={yColour}
               xColour={xColour}
+              yColour={yColour}
               zColour={zColour}
             />
           );

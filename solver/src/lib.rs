@@ -1,8 +1,14 @@
 mod cube;
-mod solve;
+mod cubie_cube;
+mod facelet_cube;
+mod moves;
+mod pochmann_solver;
 
-use crate::cube::{Cube, Move};
-use crate::solve::solve;
+use crate::cube::Cube;
+use crate::cubie_cube::CubieCube;
+use crate::facelet_cube::FaceletCube;
+use crate::moves::Move;
+use crate::pochmann_solver::solve;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -13,12 +19,12 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn rand_cube() -> String {
-    Cube::random(15).to_string()
+    FaceletCube::random(100).to_string()
 }
 
 #[wasm_bindgen]
 pub fn solve_cube(cube: String) -> Result<js_sys::Array, JsValue> {
-    match solve(&cube.parse()?) {
+    match solve(&CubieCube::from(cube.parse::<FaceletCube>()?)) {
         Some(solution) => Ok(solution
             .into_iter()
             .map(|mv| JsValue::from_str(&format!("{}", mv)))
@@ -33,5 +39,8 @@ pub fn apply_cube_moves(cube: String, moves: js_sys::Array) -> Result<String, Js
         .iter()
         .map(|mv| (mv.as_string().unwrap_or("".to_string())).parse())
         .collect::<Result<Vec<_>, _>>()?;
-    Ok(cube.parse::<Cube>()?.apply_moves(actions).to_string())
+    Ok(cube
+        .parse::<FaceletCube>()?
+        .apply_moves(&actions)
+        .to_string())
 }

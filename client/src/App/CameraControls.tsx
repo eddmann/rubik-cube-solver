@@ -35,8 +35,8 @@ const CameraControls = () => {
       enableZoom={true}
       enableKeys={false}
       enablePan={false}
-      minDistance={4}
-      maxDistance={4}
+      minDistance={5}
+      maxDistance={5}
     />
   );
 };

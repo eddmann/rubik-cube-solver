@@ -3,12 +3,12 @@ import { CubePosition, CubeRotatation } from '../constants';
 
 // prettier-ignore
 const ROTATIONS: { [rotation in CubeRotatation]: { positions: CubePosition[], axis: Vector3}} = {
-  F: { positions: ['ULF', 'URF', 'DLF', 'DRF'], axis: new Vector3(0, 0, 1) },
-  B: { positions: ['URB', 'ULB', 'DRB', 'DLB'], axis: new Vector3(0, 0, 1) },
-  R: { positions: ['URF', 'URB', 'DRF', 'DRB'], axis: new Vector3(1, 0, 0) },
-  L: { positions: ['ULB', 'ULF', 'DLB', 'DLF'], axis: new Vector3(1, 0, 0) },
-  U: { positions: ['ULB', 'URB', 'ULF', 'URF'], axis: new Vector3(0, 1, 0) },
-  D: { positions: ['DLF', 'DRF', 'DLB', 'DRB'], axis: new Vector3(0, 1, 0) },
+  F: { positions: ['ULF', 'URF', 'DLF', 'DRF', 'UF', 'DF', 'FR', 'FL', 'F'], axis: new Vector3(0, 0, 1) },
+  B: { positions: ['URB', 'ULB', 'DRB', 'DLB', 'UB', 'DB', 'BL', 'BR', 'B'], axis: new Vector3(0, 0, 1) },
+  R: { positions: ['URF', 'URB', 'DRF', 'DRB', 'UR', 'DR', 'FR', 'BR', 'R'], axis: new Vector3(1, 0, 0) },
+  L: { positions: ['ULB', 'ULF', 'DLB', 'DLF', 'UL', 'DL', 'FL', 'BL', 'L'], axis: new Vector3(1, 0, 0) },
+  U: { positions: ['ULB', 'URB', 'ULF', 'URF', 'UR', 'UF', 'UL', 'UB', 'U'], axis: new Vector3(0, 1, 0) },
+  D: { positions: ['DLF', 'DRF', 'DLB', 'DRB', 'DR', 'DF', 'DL', 'DB', 'D'], axis: new Vector3(0, 1, 0) },
 };
 
 export type RotationAnimationStep = () => boolean;
@@ -23,7 +23,8 @@ const animateRotation = (
     "'" | '2' | undefined
   ];
   const { positions, axis } = ROTATIONS[rotation];
-  const direction = extra === "'" ? 1 : -1;
+  let direction = extra === "'" ? 1 : -1;
+  if (['D', 'L', 'B'].includes(rotation)) direction = -direction;
   const quarterTurns = extra === '2' ? 2 : 1;
   const cubiesToRotate = cubies.filter(cubie =>
     positions.includes(cubie.userData.name)
