@@ -319,19 +319,18 @@ fn simplify_multi_face_moves(solution: &Vec<Move>) -> Vec<Move> {
 
     let mut simplified_solution: Vec<Move> = vec![];
 
-    for &action in solution.iter() {
-        if let Some(last_action) = simplified_solution.last_mut() {
-            if action.0 == last_action.0 {
-                if let Some(direction) =
-                    to_direction(to_quarter_turns(action.1) + to_quarter_turns(last_action.1))
+    for &Move(position, direction) in solution.iter() {
+        match simplified_solution.last() {
+            Some(&Move(last_position, last_direction)) if position == last_position => {
+                simplified_solution.pop();
+                if let Some(new_direction) =
+                    to_direction(to_quarter_turns(direction) + to_quarter_turns(last_direction))
                 {
-                    last_action.1 = direction;
-                    continue;
+                    simplified_solution.push(Move(position, new_direction));
                 }
             }
+            _ => simplified_solution.push(Move(position, direction)),
         }
-
-        simplified_solution.push(action);
     }
 
     simplified_solution
@@ -361,6 +360,14 @@ mod tests {
         assert_eq!(FaceletCube::default(), cube.apply_moves(&solution));
 
         let cube = "BGYRWOYGOWYOWRRYYBOWGBGRBORYWGGYBRBWWYGBORWYRBOOGBORWG"
+            .parse::<FaceletCube>()
+            .unwrap();
+        let solution = solve(&CubieCube::from(cube)).unwrap();
+
+        assert_no_multi_face_turns(&solution);
+        assert_eq!(FaceletCube::default(), cube.apply_moves(&solution));
+
+        let cube = "BRGOWGWWBOOYRRBOGROOYOGYGRGYWWBYYRBBYBBGOYWWORGRYBWWRG"
             .parse::<FaceletCube>()
             .unwrap();
         let solution = solve(&CubieCube::from(cube)).unwrap();
