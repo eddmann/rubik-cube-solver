@@ -5,8 +5,8 @@ use crate::cubie_cube::Corner::*;
 use crate::cubie_cube::Edge::*;
 use crate::cubie_cube::{Corner, CubieCube, Edge};
 use crate::moves::Direction::*;
-use crate::moves::Move;
 use crate::moves::Position::*;
+use crate::moves::{Direction, Move};
 
 type PochmannCube = [u32; 40];
 
@@ -296,17 +296,85 @@ pub(crate) fn solve(cube: &CubieCube) -> Option<Vec<Move>> {
         solution.extend(phase_moves);
     }
 
-    Some(solution)
+    Some(simplify_multi_face_moves(&solution))
+}
+
+fn simplify_multi_face_moves(solution: &Vec<Move>) -> Vec<Move> {
+    fn to_quarter_turns(d: Direction) -> u8 {
+        match d {
+            Normal => 1,
+            Prime => 3,
+            Half => 2,
+        }
+    }
+
+    fn to_direction(quarter_turns: u8) -> Option<Direction> {
+        match quarter_turns % 4 {
+            1 => Some(Normal),
+            2 => Some(Half),
+            3 => Some(Prime),
+            _ => None,
+        }
+    }
+
+    let mut simplified_solution: Vec<Move> = vec![];
+
+    for &action in solution.iter() {
+        if let Some(last_action) = simplified_solution.last_mut() {
+            if action.0 == last_action.0 {
+                if let Some(direction) =
+                    to_direction(to_quarter_turns(action.1) + to_quarter_turns(last_action.1))
+                {
+                    last_action.1 = direction;
+                    continue;
+                }
+            }
+        }
+
+        simplified_solution.push(action);
+    }
+
+    simplified_solution
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::CubieCube;
+    use crate::FaceletCube;
 
     #[test]
     fn solve_random_cube() {
         let cube = CubieCube::random(100);
         let solution = solve(&cube);
         assert_eq!(CubieCube::default(), cube.apply_moves(&solution.unwrap()));
+    }
+
+    #[test]
+    fn solutions_do_not_have_multi_face_turns() {
+        let cube = "OGOYWWWWYRBYRRRORRORBYGGWOBBWYBYYRWWWBBGOOGORGOGBBYGGY"
+            .parse::<FaceletCube>()
+            .unwrap();
+        let solution = solve(&CubieCube::from(cube)).unwrap();
+
+        assert_no_multi_face_turns(&solution);
+        assert_eq!(FaceletCube::default(), cube.apply_moves(&solution));
+
+        let cube = "BGYRWOYGOWYOWRRYYBOWGBGRBORYWGGYBRBWWYGBORWYRBOOGBORWG"
+            .parse::<FaceletCube>()
+            .unwrap();
+        let solution = solve(&CubieCube::from(cube)).unwrap();
+
+        assert_no_multi_face_turns(&solution);
+        assert_eq!(FaceletCube::default(), cube.apply_moves(&solution));
+    }
+
+    fn assert_no_multi_face_turns(solution: &Vec<Move>) {
+        let has_multi_face_turn = solution
+            .iter()
+            .zip(solution.iter().skip(1))
+            .any(|(a, b)| a.0 == b.0);
+
+        assert!(!has_multi_face_turn);
     }
 }
